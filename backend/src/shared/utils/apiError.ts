@@ -1,7 +1,7 @@
 type ApiErrorParams = {
   message?: string;
   statusCode?: number;
-  errors?: any;
+  errors?: unknown;
   code: string;
 };
 
@@ -31,11 +31,16 @@ const errorType = {
     statusCode: 401,
     message: "Missing authorization HEADER",
   },
+  EXPIRED_JWT: {
+    name: "EXPIRED_JWT",
+    statusCode: 401,
+    message: "Expired JWT",
+  },
 };
 
 export class ApiError extends Error {
   statusCode: number;
-  errors: any;
+  errors: unknown;
   code: string;
   constructor({
     code = errorType.BAD_REQUEST.name,
@@ -70,7 +75,7 @@ export class RouteNotFound extends ApiError {
 }
 
 export class InvalidParameter extends ApiError {
-  constructor(errors: any = []) {
+  constructor(errors: unknown = []) {
     super({
       code: errorType.INVALID_PARAMETER.name,
       message: errorType.INVALID_PARAMETER.message,
@@ -106,6 +111,16 @@ export class MissingAuthorizationHeader extends ApiError {
       code: errorType.MISSING_AUTHORIZATION_HEADER.name,
       message: errorType.MISSING_AUTHORIZATION_HEADER.message,
       statusCode: errorType.MISSING_AUTHORIZATION_HEADER.statusCode,
+    });
+  }
+}
+
+export class ExpiredJWT extends ApiError {
+  constructor() {
+    super({
+      code: errorType.EXPIRED_JWT.name,
+      message: errorType.EXPIRED_JWT.message,
+      statusCode: errorType.EXPIRED_JWT.statusCode,
     });
   }
 }

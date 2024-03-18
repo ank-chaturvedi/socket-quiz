@@ -10,6 +10,7 @@ interface IGame {
 }
 
 interface IRoom {
+  createdBy: Types.ObjectId;
   name: string;
   description: string;
   joinType: string;
@@ -39,6 +40,7 @@ const gameSchema = new Schema<IGame, RoomModelType>({
 
 const schema = new Schema<IRoom>(
   {
+    createdBy: { type: Schema.Types.ObjectId, required: true },
     name: { type: String, required: true },
     description: { type: String, required: true },
     joinType: { type: String, required: true },

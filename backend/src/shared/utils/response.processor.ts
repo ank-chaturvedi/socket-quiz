@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import SuccessDTO from "../application/success.dto";
-import { ApiError, BadRequest } from "./apiError";
+import { ApiError, BadRequest, ExpiredJWT } from "./apiError";
+import { JsonWebTokenError } from "jsonwebtoken";
 
 type AsyncFunction = (
   req: Request,
@@ -8,7 +9,16 @@ type AsyncFunction = (
   next: NextFunction
 ) => Promise<SuccessDTO>;
 
-export const errorProcessor = (res: Response, error: ApiError) => {
+export const errorProcessor = (res: Response, error) => {
+  console.log(error);
+  if (error instanceof ApiError) {
+    return res.status(error.statusCode).json(error.toResponseJson());
+  }
+  if (error instanceof JsonWebTokenError) {
+    error = new ExpiredJWT();
+    return res.status(error.statusCode).json(error.toResponseJson());
+  }
+  error = new BadRequest();
   return res.status(error.statusCode).json(error.toResponseJson());
 };
 
@@ -19,12 +29,7 @@ export const responseProcessor = (asyncFn: AsyncFunction) => {
         return res.status(response.statusCode).json(response.toResponseJson());
       })
       .catch((error) => {
-        console.log(error);
-        if (error instanceof ApiError) {
-          return errorProcessor(res, error);
-        }
-        const badRequest = new BadRequest();
-        return errorProcessor(res, badRequest);
+        return errorProcessor(res, error);
       });
   };
 };

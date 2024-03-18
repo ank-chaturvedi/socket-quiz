@@ -12,10 +12,7 @@ export class MainRoute {
   }
 
   attach(method: string) {
-    const wrapperFn = async (
-      req: Request,
-      res: Response,
-    ) => {
+    const wrapperFn = async (req: Request, res: Response) => {
       return await new this.controller(req, res)[method]();
     };
     return responseProcessor(wrapperFn);

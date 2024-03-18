@@ -1,8 +1,13 @@
 import express, { Application } from "express";
+
 import connect from "./shared/database/connect";
 import QuizIndexRoute from "./QuizModule/index.route";
+import AuthIndexRoute from "./AuthModule/index.route";
 import { responseProcessor } from "./shared/utils/response.processor";
 import { RouteNotFound } from "./shared/utils/apiError";
+import { middlewareProcessor } from "./shared/utils/middleware.processor";
+import { checkAuth } from "./shared/middlewares/auth.middleware";
+
 export class AppServer {
   app: Application;
 
@@ -21,11 +26,13 @@ export class AppServer {
     connect();
   }
   setupController() {
-    this.app.use("/api/rooms", new QuizIndexRoute().router);
-    this.app.use(responseProcessor(async () => {
-      console.log('is comming');
-      throw new RouteNotFound();
-    }));
+    this.app.use("/api/rooms", middlewareProcessor(checkAuth), new QuizIndexRoute().router);
+    this.app.use("/api/auth", new AuthIndexRoute().router);
+    this.app.use(
+      responseProcessor(async () => {
+        throw new RouteNotFound();
+      })
+    );
   }
 }
 
